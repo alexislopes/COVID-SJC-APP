@@ -188,6 +188,7 @@ export default {
 
       if (res.status === 201)
         document.querySelector("#salvar").classList.remove("loading");
+      this.$router.push("/");
     }
   }
 };

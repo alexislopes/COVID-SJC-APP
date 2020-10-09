@@ -55,7 +55,7 @@
         <div class="card">
           <p class="card-title">Positivos</p>
           <div class="dados">
-            <p class="dado">{{ informe[0].casos_positivos }}</p>
+            <p class="dado">{{   informe[0].casos_positivos - informe[0].casos_recuperados}}</p>
             <p class="diferenca">
               {{ modulate(diferencaPositivos) }}
               <i
@@ -75,8 +75,8 @@
           </div>
 
           <div class="porcentagens">
-            <p class="dado real">{{ informe[0].casos_positivos - informe[0].casos_recuperados }}</p>
-            <p class="exp">Casos Reais</p>
+            <p class="dado real">{{ informe[0].casos_positivos }}</p>
+            <p class="exp">Casos Acumulados</p>
           </div>
           <!-- <div>
             <p
@@ -137,6 +137,10 @@
               <p>DESCARTADOS</p>
               <p>{{informes[0].obitos_descartados}}</p>
             </div>
+            <div class="porcentagens">
+              <p class="dado real">{{ mmsemana.toFixed(2) }}</p>
+              <p class="exp">Média Móvel</p>
+            </div>
           </div>
         </div>
         <div class="card">
@@ -195,7 +199,9 @@ export default {
       suspeitos: null,
       positivos: null,
       obitos: null,
-      recuperados: null
+      recuperados: null,
+      mmsemana: 0,
+      mmDuasSemanas: 0
     };
   },
   async created() {
@@ -214,8 +220,40 @@ export default {
     this.recuperados = await config.recuperados(this.informes);
 
     console.log(informes);
+    this.mediaMovelDuasSemanas();
+    this.mediaMovelSemana();
   },
   methods: {
+    async mediaMovelSemana() {
+      let informesSeteDias = this.informes;
+      informesSeteDias.length = 7;
+
+      informesSeteDias = informesSeteDias.map(
+        informe => informe.obitos_positivos
+      );
+
+      this.mmsemana = this.operacao(informesSeteDias, 7);
+      console.log("mm1: ", this.mmsemana);
+    },
+
+    mediaMovelDuasSemanas() {
+      let informeDuasSemanas = this.informes;
+      informeDuasSemanas.length = 14;
+
+      informeDuasSemanas = informeDuasSemanas.map(
+        informe => informe.obitos_positivos
+      );
+
+      this.mmDuasSemanas = this.operacao(informeDuasSemanas, 14);
+      console.log("mm2: ", this.mmDuasSemanas);
+    },
+    operacao(numeros, den) {
+      console.log("numeros: ", numeros);
+      let primeiro = numeros[0];
+      let ultimo = numeros[numeros.length - 1];
+      let operacao = (primeiro - ultimo) / den;
+      return operacao;
+    },
     isPositive(n) {
       if (n > 0) return true;
       else if (n === 0) return "";
@@ -302,7 +340,7 @@ export default {
     },
     perPositivos() {
       return (
-        (this.informe[0].casos_positivos / this.informe[0].casos_suspeitos) *
+        ((this.informe[0].casos_positivos - this.informe[0].casos_recuperados) / this.informe[0].casos_suspeitos) *
         100
       );
     },
