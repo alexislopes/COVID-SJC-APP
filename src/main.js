@@ -44,3 +44,7 @@ new Vue({
   store,
   render: (h) => h(App),
 }).$mount("#app");
+
+function setCode(code){
+  console.log(code);
+}
